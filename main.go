@@ -33,13 +33,13 @@ func main(){
 			fmt.Println("That's the end of the quiz!")
 			break
 		}else if err != nil{
-			fmt.Printf("There is an UNEXPECTED error: %v\n", err)
+			fmt.Fprintf(os.Stderr, "There is an UNEXPECTED error: %v\n", err)
 			continue
 		}
 		//Check that we can get an answer from the question field. Skip the line if we can't. 
 		result, err := solve_question(csv_line[0])
 		if err != nil{
-			fmt.Println(err)
+			fmt.Fprintln(os.Stderr, err)
 			continue
 		}
 		//Increment the valid question total and prompt the user with the whole question field. 
