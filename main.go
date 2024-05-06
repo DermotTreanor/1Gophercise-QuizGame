@@ -13,6 +13,7 @@ import (
 )
 
 var filename *string = flag.String("csv", "problem.csv", "this is the help message for this flag")
+var shuffle *bool = flag.Bool("shfl", false, "shuffle the order of the quiz used")
 var total_questions, total_right, total_wrong int 
 
 func main(){
