@@ -5,6 +5,7 @@ import (
 	"flag"
 	"fmt"
 	"io"
+	"bufio"
 	"os"
 	"regexp"
 	"strconv"
@@ -47,8 +48,11 @@ func main(){
 		total_questions++
 		fmt.Println(csv_line[0])
 		var given_input string
-		//PROBLEMS: If the user adds spaces or newlines we get issues with any Scan__ method we use.
-		fmt.Scanln(&given_input)
+		
+		//Query: Why is it that we cannot use the fmt.Scan functions here without the users extra spaces/values/newlines causing issues.
+		input := bufio.NewScanner(os.Stdout)
+		input.Scan()
+		given_input = input.Text()
 		mark_attempt(result, given_input)
 	}
 	//Display the results of the questions. 
