@@ -46,7 +46,8 @@ func main(){
 		total_questions++
 		fmt.Println(csv_line[0])
 		var given_input string
-		fmt.Scanf("%s", &given_input)
+		//PROBLEMS: If the user adds spaces or newlines we get issues with any Scan__ method we use.
+		fmt.Scanln(&given_input)
 		mark_attempt(result, given_input)
 	}
 	//Display the results of the questions. 
