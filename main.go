@@ -10,6 +10,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 	"errors"
 )
@@ -19,12 +20,16 @@ var clock *int = flag.Int("clock", 30, "selects the number of seconds the quiz l
 var shuffle *bool = flag.Bool("shfl", false, "shuffle the order of the quiz used")
 var total_questions, total_right, total_wrong int 
 
+var mu sync.Mutex
 func main(){
 	flag.Parse()
 	go run_quiz()
+
 	time.Sleep(time.Duration(*clock) * time.Second)
-	//Display the results of the questions. 
-	fmt.Println(total_questions, total_right, total_wrong)
+	mu.Lock()
+	if total_questions > (total_wrong + total_right){total_questions--}
+	fmt.Println(total_questions, total_right, total_wrong) //Display results
+	mu.Unlock()
 }
 
 
@@ -53,8 +58,11 @@ func run_quiz(){
 			fmt.Fprintln(os.Stderr, err)
 			continue
 		}
+
 		//Increment the valid question total and prompt the user with the whole question field. 
+		mu.Lock()
 		total_questions++
+		mu.Unlock()
 		fmt.Println(csv_line[0])
 		var given_input string
 		
@@ -62,7 +70,10 @@ func run_quiz(){
 		input := bufio.NewScanner(os.Stdout)
 		input.Scan()
 		given_input = input.Text()
+		mu.Lock()
 		mark_attempt(result, given_input)
+		mu.Unlock()
+		
 	}
 }
 
