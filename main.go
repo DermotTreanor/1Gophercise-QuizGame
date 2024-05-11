@@ -10,16 +10,25 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"time"
 	"errors"
 )
 
 var filename *string = flag.String("csv", "problem.csv", "this is the help message for this flag")
+var clock *int = flag.Int("clock", 30, "selects the number of seconds the quiz lasts")
 var shuffle *bool = flag.Bool("shfl", false, "shuffle the order of the quiz used")
 var total_questions, total_right, total_wrong int 
 
 func main(){
 	flag.Parse()
+	go run_quiz()
+	time.Sleep(time.Duration(*clock) * time.Second)
+	//Display the results of the questions. 
+	fmt.Println(total_questions, total_right, total_wrong)
+}
 
+
+func run_quiz(){
 	file, err := os.Open(*filename)
 	if err != nil{
 		fmt.Printf("The following error occured: %v\n", err)
@@ -55,16 +64,13 @@ func main(){
 		given_input = input.Text()
 		mark_attempt(result, given_input)
 	}
-	//Display the results of the questions. 
-	fmt.Println(total_questions, total_right, total_wrong)
 }
-
 
 func solve_question(question string) (int, error){
 	//Find the math portion of the question with a regex
 	reg := regexp.MustCompile(`\d+[\+\-\*/]\d+`)
 	finding := reg.Find([]byte(question))
-	if len(finding) < 1{
+	if finding == nil{
 		return 0, errors.New("Couldn't find appropriate math expression.")
 	}
 	
@@ -99,14 +105,18 @@ func solve_question(question string) (int, error){
 
 
 func mark_attempt(true_answer int, attempt string){
+	//Trim the spacing and convert to an int. If we encounter an error when converting then we increment wrong total
 	int_attempt, err := strconv.Atoi(strings.Trim(attempt, " "))
 	if err != nil{
+		//fmt.Println("WRONG INPUT!")
 		total_wrong++
 		return
 	}
 	if true_answer == int_attempt{
+		//fmt.Println("RIGHT Answer!")
 		total_right++
 	}else{
+		//fmt.Println("WRONG Answer!")
 		total_wrong++
 	}
 	return
