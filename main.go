@@ -45,6 +45,8 @@ func run_quiz(){
 	//Since os.File is a type that implements io.Reader we can pass it here.
 	var csv_reader *csv.Reader = csv.NewReader(file)
 	var csv_lines [][]string
+
+	//Read all the records to a slice. Shuffle the slice if flag is set
 	csv_lines, err = csv_reader.ReadAll()
 	if err != nil{
 		fmt.Fprintf(os.Stderr, "Error extracting lines: %v\n", err)
@@ -53,8 +55,10 @@ func run_quiz(){
 		fmt.Fprint(os.Stderr, "Error: No records found in file.")
 	}
 	if *shuffle{
-		shuffle_slice(&csv_lines)
+		shuffle_slice(csv_lines)
 	}
+
+	//Loop through the slice to ask each question. 
 	for _, csv_line := range csv_lines{
 		//Check that we can get an answer from the question field. Skip the line if we can't. 
 		result, err := solve_question(csv_line[0])
@@ -81,12 +85,21 @@ func run_quiz(){
 	}
 }
 
-func shuffle_slice(sl *[][]string){
+func shuffle_slice(sl [][]string){
 
-	jumbled_indices := make([]int, len(*sl))
+	jumbled := make([][]string, len(sl))
 
-	//Make our new random source object seeded with a random int64
-	rand.NewSource(time.Now().Unix())
+	//Create the source of random numbers and the Rand object that will use them.
+	seed := time.Now().Unix()
+	source := rand.NewSource(seed)
+	rand_point := rand.New(source)
+	
+	//Create a slice of jumbled inds and use it to put sl values in jumbled randomly
+	mixed_inds := rand_point.Perm(len(sl))
+	for i, v := range mixed_inds{
+		jumbled[i] = sl[v] 
+	}
+	copy(sl, jumbled)
 }
 
 
