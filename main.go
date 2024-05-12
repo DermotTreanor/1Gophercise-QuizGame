@@ -4,7 +4,7 @@ import (
 	"encoding/csv"
 	"flag"
 	"fmt"
-	"io"
+	//"io"
 	"bufio"
 	"os"
 	"regexp"
@@ -13,6 +13,7 @@ import (
 	"sync"
 	"time"
 	"errors"
+	"math/rand"
 )
 
 var filename *string = flag.String("csv", "problem.csv", "this is the help message for this flag")
@@ -34,6 +35,7 @@ func main(){
 
 
 func run_quiz(){
+	//Open the file specified with the flag
 	file, err := os.Open(*filename)
 	if err != nil{
 		fmt.Printf("The following error occured: %v\n", err)
@@ -42,16 +44,18 @@ func run_quiz(){
 	
 	//Since os.File is a type that implements io.Reader we can pass it here.
 	var csv_reader *csv.Reader = csv.NewReader(file)
-	var csv_line []string
-	for{
-		csv_line, err = csv_reader.Read()
-		if err == io.EOF{
-			fmt.Println("That's the end of the quiz!")
-			break
-		}else if err != nil{
-			fmt.Fprintf(os.Stderr, "There is an UNEXPECTED error: %v\n", err)
-			continue
-		}
+	var csv_lines [][]string
+	csv_lines, err = csv_reader.ReadAll()
+	if err != nil{
+		fmt.Fprintf(os.Stderr, "Error extracting lines: %v\n", err)
+	}
+	if len(csv_lines) < 1{
+		fmt.Fprint(os.Stderr, "Error: No records found in file.")
+	}
+	if *shuffle{
+		shuffle_slice(&csv_lines)
+	}
+	for _, csv_line := range csv_lines{
 		//Check that we can get an answer from the question field. Skip the line if we can't. 
 		result, err := solve_question(csv_line[0])
 		if err != nil{
@@ -76,6 +80,15 @@ func run_quiz(){
 		
 	}
 }
+
+func shuffle_slice(sl *[][]string){
+
+	jumbled_indices := make([]int, len(*sl))
+
+	//Make our new random source object seeded with a random int64
+	rand.NewSource(time.Now().Unix())
+}
+
 
 func solve_question(question string) (int, error){
 	//Find the math portion of the question with a regex
