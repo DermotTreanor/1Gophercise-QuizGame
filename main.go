@@ -49,7 +49,9 @@ func run_quiz(){
 	//Read all the records to a slice. Shuffle the slice if flag is set
 	csv_lines, err = csv_reader.ReadAll()
 	if err != nil{
-		fmt.Fprintf(os.Stderr, "Error extracting lines: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Error in CSV file: \n%v\n", err)
+		fmt.Fprintln(os.Stderr, "Exiting...")
+		os.Exit(1)
 	}
 	if len(csv_lines) < 1{
 		fmt.Fprint(os.Stderr, "Error: No records found in file.")
