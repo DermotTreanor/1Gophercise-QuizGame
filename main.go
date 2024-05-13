@@ -27,12 +27,8 @@ func main(){
 	go run_quiz()
 
 	time.Sleep(time.Duration(*clock) * time.Second)
-	mu.Lock()
-	if total_questions > (total_wrong + total_right){total_questions--}
-	fmt.Println(total_questions, total_right, total_wrong) //Display results
-	mu.Unlock()
+	end_quiz()
 }
-
 
 func run_quiz(){
 	//Open the file specified with the flag
@@ -85,6 +81,7 @@ func run_quiz(){
 		mu.Unlock()
 		
 	}
+	end_quiz()
 }
 
 func shuffle_slice(sl [][]string){
@@ -161,3 +158,10 @@ func mark_attempt(true_answer int, attempt string){
 	return
 }
 
+func end_quiz(){
+	mu.Lock()
+	if total_questions > (total_wrong + total_right){total_questions--}
+	fmt.Println(total_questions, total_right, total_wrong) //Display results
+	mu.Unlock()
+	os.Exit(0)
+}
